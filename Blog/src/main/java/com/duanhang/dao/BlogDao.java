@@ -66,5 +66,9 @@ public interface BlogDao {
 	 * @return
 	 */
 	public Blog getNextBlog(Integer id);
+	
+	
+	
+	
 
 }

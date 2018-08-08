@@ -1,6 +1,7 @@
 package com.duanhang.controller;
 
 import java.util.Arrays;
+import java.util.HashMap;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -17,20 +18,25 @@ import com.duanhang.entity.Blog;
 import com.duanhang.entity.Blogger;
 import com.duanhang.service.BlogService;
 import com.duanhang.service.BloggerService;
+import com.duanhang.service.CommentService;
 import com.duanhang.util.CryptographyUtil;
 import com.duanhang.util.StringUtil;
+import com.sun.jndi.url.corbaname.corbanameURLContextFactory;
 
 /**
  * 博主Controller层
  * @author Administrator
+ * @param <V>
  *
  */
 @Controller
 @RequestMapping("/blog")
-public class BlogController {
+public class BlogController<V> {
 
 	@Resource
 	private BlogService blogService;
+	@Resource
+	private CommentService commentService;
 	
 	@RequestMapping("/articles/{id}")
 	public ModelAndView details(@PathVariable("id")Integer id,HttpServletRequest request) {
@@ -48,6 +54,11 @@ public class BlogController {
  		mav.addObject("blog", blog);
  		blog.setClickHit(blog.getClickHit()+1);
  		blogService.update(blog);
+ 		HashMap<String, Object> map = new HashMap<String, Object>();
+ 		map.put("blogId", blog.getId());
+ 		map.put("state",1);//设置为审核的，暂时的设计
+ 		mav.addObject("commentList", commentService.list(map));
+ 		
  		mav.addObject("pageCode", 
  				this.getUpAndDownPageCode(blogService.getLastBlog(id), 
  										  blogService.getNextBlog(id), 
