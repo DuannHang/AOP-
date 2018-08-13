@@ -13,15 +13,16 @@ import com.duanhang.service.BlogService;
 
 /**
  * 博客Service实现类
+ * 
  * @author Administrator
  *
  */
 @Service("blogService")
-public class BlogServiceImpl implements BlogService{
+public class BlogServiceImpl implements BlogService {
 
 	@Resource
 	private BlogDao blogDao;
-	
+
 	public List<Blog> countList() {
 		return blogDao.countList();
 	}
@@ -50,4 +51,16 @@ public class BlogServiceImpl implements BlogService{
 		return blogDao.getNextBlog(id);
 	}
 
+	public Integer add(Blog blog) {
+		return blogDao.add(blog);
+	}
+
+	public Integer delete(Integer id) {
+		return blogDao.delete(id);
+	}
+
+	public Integer getBlogByTypeId(Integer typeId) {
+		// TODO Auto-generated method stub
+		return blogDao.getBlogByTypeId(typeId);
+	}
 }

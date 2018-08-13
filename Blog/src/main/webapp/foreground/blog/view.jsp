@@ -31,6 +31,7 @@
 		}else{
 			$.post("${pageContext.request.contextPath}/comment/save.do",{"content":content,"imageCode":imageCode,"blog.id":'${blog.id}'},function(result){
 				if (result.success) {
+					window.location.reload();
 					alert("评论已经提交成功，等待审核通过后显示！");
 				}else{
 					alert("后台更新评论失败！");
@@ -86,7 +87,7 @@
 				<c:when test="${keyWord==null }">&nbsp;&nbsp;&nbsp;无</c:when>
 				<c:otherwise>
 					<c:forEach items="${keyWord }" var="word">
-						&nbsp;&nbsp;<font size="5px"><a href="#" target="_blank">${word }</a></font>&nbsp;&nbsp;
+						&nbsp;&nbsp;<font size="4px"><a href="${pageContext.request.contextPath}/blog/q.html?q=${keyWord}" target="_blank">${word }</a></font>&nbsp;&nbsp;
 					</c:forEach>
 				</c:otherwise>
 			</c:choose>

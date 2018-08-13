@@ -14,7 +14,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		<association property="blog" column="blogId"
 			select="com.duanhang.dao.BlogDao.findById"></association>
 	</resultMap>
-
+	<!-- 查询所有的评论 -->
 	<select id="list" parameterType="Map" resultMap="CommentResult">
 		select * from t_comment
 		<where>
@@ -26,11 +26,37 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 			</if>
 		</where>
 		order by commentDate desc
+		<if test="start!=null and size!=null">
+			limit #{start},#{size}
+		</if>
 	</select>
-	
+
 	<!-- 更新评论 -->
 	<insert id="add" parameterType="com.duanhang.entity.Comment">
-		insert into t_comment values(null,#{userIp},#{blog.id},#{content},now(),0);
+		insert into t_comment
+		values(null,#{userIp},#{blog.id},#{content},now(),0);
 	</insert>
+	<!-- 获取所有相同状态（过审或者不过审或者待审的评论） -->
+	<select id="getTotal" parameterType="Map" resultType="Long">
+		select count(*) from t_comment
+		<where>
+			<if test="state!=null">
+				and state=#{state}
+			</if>
+		</where>
+	</select>
+	<update id="update" parameterType="Comment">
+		update t_comment
+		<set>
+			<if test="state!=null">
+				state=#{state},
+			</if>
+		</set>
+		where id=#{id}
+	</update>
+	<delete id="delete" parameterType="Integer">
+		delete from t_comment where
+		id=#{id}
+	</delete>
 
 </mapper> 

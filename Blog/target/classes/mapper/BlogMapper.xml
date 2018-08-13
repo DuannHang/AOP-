@@ -28,6 +28,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	<select id="list" parameterType="Map" resultMap="BlogResult">
 		select * from t_blog
 		<where>
+			<if test="title!=null and title!=''">
+				and title like #{title}
+			</if>
 			<if test="typeId!=null and typeId!='' ">
 				and typeId=#{typeId}
 			</if>
@@ -44,6 +47,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	<select id="getTotal" parameterType="Map" resultType="Long">
 		select count(*) from t_blog
 		<where>
+			<if test="title!=null and title!=''">
+				and title like #{title}
+			</if>
 			<if test="typeId!=null and typeId!='' ">
 				and typeId=#{typeId}
 			</if>
@@ -54,31 +60,59 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	</select>
 
 	<select id="findById" parameterType="Integer" resultMap="BlogResult">
-		select * from t_blog where id=#{id}
+		select *
+		from t_blog where id=#{id}
 	</select>
-	
+
 	<update id="update" parameterType="com.duanhang.entity.Blog">
 		update t_blog
 		<set>
+			<if test="title!=null and title!=''">
+				title=#{title},
+			</if>
+			<if test="summary!=null and summary!=''">
+				summary=#{summary},
+			</if>
+			<if test="content!=null and content!=''">
+				content=#{content},
+			</if>
+			<if test="blogType.id!=null">
+				typeId=#{blogType.id},
+			</if>
 			<if test="clickHit!=null">
 				clickHit=#{clickHit},
 			</if>
 			<if test="replyHit!=null">
 				replyHit=#{replyHit},
 			</if>
+			<if test="keyWord!=null and keyWord!=''">
+				keyWord=#{keyWord},
+			</if>
 		</set>
 		where id=#{id}
-	
+
 	</update>
-	
+
 	<select id="getLastBlog" parameterType="Integer" resultMap="BlogResult">
 		select * from t_blog where id&lt;#{id} order by id desc limit 1;
 	</select>
-	
+
 	<select id="getNextBlog" parameterType="Integer" resultMap="BlogResult">
 		select * from t_blog where id&gt;#{id} order by id asc limit 1;
 	</select>
+	<!-- useGeneratedKeys="true" keyProperty="id"通过插入数据库后返回主键id -->
+	<insert id="add" useGeneratedKeys="true" keyProperty="id"
+		parameterType="Blog">
+		insert into t_blog
+		values(null,#{title},#{summary},now(),0,0,#{content},#{blogType.id},#{keyWord})
+	</insert>
+	<delete id="delete" parameterType="Integer">
+		delete from t_blog where
+		id=#{id}
+	</delete>
 	
-
+	<select id="getBlogByTypeId" parameterType="Integer" resultType="Integer">
+		select count(*) from t_blog where typeId=#{typeId}
+	</select>
 
 </mapper> 

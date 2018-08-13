@@ -51,6 +51,7 @@ public interface BlogService {
 	 * @return
 	 */
 	public Integer update(Blog blog);
+
 	/**
 	 * 获取上一个博客文章
 	 * 
@@ -58,6 +59,7 @@ public interface BlogService {
 	 * @return
 	 */
 	public Blog getLastBlog(Integer id);
+
 	/**
 	 * 获取下一个博客文章
 	 * 
@@ -66,4 +68,27 @@ public interface BlogService {
 	 */
 	public Blog getNextBlog(Integer id);
 
+	/**
+	 * 添加博客信息
+	 * 
+	 * @param blog
+	 * @return
+	 */
+	public Integer add(Blog blog);
+
+	/**
+	 * 删除博客信息
+	 * 
+	 * @param id
+	 * @return
+	 */
+	public Integer delete(Integer id);
+
+	/**
+	 * 查询指定的博客类别下的博客数量
+	 * 
+	 * @param typeId
+	 * @return
+	 */
+	public Integer getBlogByTypeId(Integer typeId);
 }

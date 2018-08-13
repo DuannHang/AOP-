@@ -2,29 +2,26 @@ package com.duanhang.controller;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.authc.UsernamePasswordToken;
-import org.apache.shiro.subject.Subject;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.duanhang.entity.Blog;
-import com.duanhang.entity.Blogger;
+import com.duanhang.lucene.BlogIndex;
 import com.duanhang.service.BlogService;
-import com.duanhang.service.BloggerService;
 import com.duanhang.service.CommentService;
-import com.duanhang.util.CryptographyUtil;
 import com.duanhang.util.StringUtil;
-import com.sun.jndi.url.corbaname.corbanameURLContextFactory;
 
 /**
  * 博主Controller层
+ * 
  * @author Administrator
  * @param <V>
  *
@@ -37,61 +34,129 @@ public class BlogController<V> {
 	private BlogService blogService;
 	@Resource
 	private CommentService commentService;
-	
+	private BlogIndex blogIndex = new BlogIndex();
+
 	@RequestMapping("/articles/{id}")
-	public ModelAndView details(@PathVariable("id")Integer id,HttpServletRequest request) {
+	public ModelAndView details(@PathVariable("id") Integer id, HttpServletRequest request) {
 		ModelAndView mav = new ModelAndView();
 		Blog blog = blogService.findById(id);
 		String keyWord = blog.getKeyWord();
-//		放博客关键字
+		// 放博客关键字
 		if (StringUtil.isNotEmpty(keyWord)) {
 			String[] arr = keyWord.split(" ");
 			mav.addObject("keyWord", StringUtil.filterWhite(Arrays.asList(arr)));
-		}else {
+		} else {
 			mav.addObject("keyWord", null);
 		}
-		
- 		mav.addObject("blog", blog);
- 		blog.setClickHit(blog.getClickHit()+1);
- 		blogService.update(blog);
- 		HashMap<String, Object> map = new HashMap<String, Object>();
- 		map.put("blogId", blog.getId());
- 		map.put("state",1);//设置为审核的，暂时的设计
- 		mav.addObject("commentList", commentService.list(map));
- 		
- 		mav.addObject("pageCode", 
- 				this.getUpAndDownPageCode(blogService.getLastBlog(id), 
- 										  blogService.getNextBlog(id), 
- 										  request.getServletContext().getContextPath()));
- 		
+
+		mav.addObject("blog", blog);
+		blog.setClickHit(blog.getClickHit() + 1);
+		blogService.update(blog);
+		HashMap<String, Object> map = new HashMap<String, Object>();
+		map.put("blogId", blog.getId());
+		map.put("state", 1);// 设置为审核的，暂时的设计
+		mav.addObject("commentList", commentService.list(map));
+
+		mav.addObject("pageCode", this.getUpAndDownPageCode(blogService.getLastBlog(id), blogService.getNextBlog(id),
+				request.getServletContext().getContextPath()));
+
 		mav.addObject("pageTitle", blog.getTitle());
 		mav.addObject("mainPage", "foreground/blog/view.jsp");
 		mav.setViewName("mainTemp");
 		return mav;
 	}
+
 	/**
 	 * 获取博客的上下一篇文章
+	 * 
 	 * @param lastBlog
 	 * @param nextBlog
 	 * @param projectContext
 	 * @return
 	 */
-	public String getUpAndDownPageCode(Blog lastBlog,Blog nextBlog,String projectContext) {
+	public String getUpAndDownPageCode(Blog lastBlog, Blog nextBlog, String projectContext) {
 		StringBuffer pageCode = new StringBuffer();
-		if (lastBlog==null || lastBlog.getId()==null) {
+		if (lastBlog == null || lastBlog.getId() == null) {
 			pageCode.append("<p>上一篇：没有了</p>");
-		}else {
-			pageCode.append("<p>上一篇：<a href='"+projectContext+"/blog/articles/"+lastBlog.getId()+".html'>"+lastBlog.getTitle()+"</a></p>");	
+		} else {
+			pageCode.append("<p>上一篇：<a href='" + projectContext + "/blog/articles/" + lastBlog.getId() + ".html'>"
+					+ lastBlog.getTitle() + "</a></p>");
 		}
-		if (nextBlog==null || nextBlog.getId()==null) {
+		if (nextBlog == null || nextBlog.getId() == null) {
 			pageCode.append("<p>下一篇：没有了</p>");
-		}else {
-			pageCode.append("<p>下一篇：<a href='"+projectContext+"/blog/articles/"+nextBlog.getId()+".html'>"+nextBlog.getTitle()+"</a></p>");	
+		} else {
+			pageCode.append("<p>下一篇：<a href='" + projectContext + "/blog/articles/" + nextBlog.getId() + ".html'>"
+					+ nextBlog.getTitle() + "</a></p>");
 		}
 		return pageCode.toString();
-		
+
 	}
-	
-	
-	
+
+	/**
+	 * 根据关键字查询相关博客信息
+	 * 
+	 * @param q
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping("/q")
+	public ModelAndView search(@RequestParam(value = "q", required = false) String q,
+			@RequestParam(value = "page", required = false) String page, HttpServletRequest request) throws Exception {
+		int pageSize = 2;// 每一个检索结果分页的条数——每一页2条
+		if (StringUtil.isEmpty(page)) {
+			page = "1";
+		}
+		ModelAndView mav = new ModelAndView();
+		mav.addObject("pageTitle", "搜索关键字'" + q + "'结果页面_java开源博客系统");
+		mav.addObject("mainPage", "foreground/blog/result.jsp");
+		List<Blog> blogList = blogIndex.searchBlog(q);
+		Integer toIndex = blogList.size() >= Integer.parseInt(page) * pageSize ? Integer.parseInt(page) * pageSize
+				: blogList.size();
+		List<Blog> subList = blogList.subList((Integer.parseInt(page) - 1) * pageSize, toIndex);
+		mav.addObject("blogList",subList);
+		mav.addObject("pageCode", this.genUpAndDownPageCode(Integer.parseInt(page), blogList.size(), q, pageSize,
+				request.getServletContext().getContextPath()));
+		mav.addObject("q", q);
+		mav.addObject("resultTotal", blogList.size());
+		mav.setViewName("mainTemp");
+		return mav;
+	}
+
+	/**
+	 * 获取上一页，下一页代码
+	 * 
+	 * @param page
+	 * @param totalNum
+	 * @param q
+	 * @param pageSize
+	 * @param projectContext
+	 * @return
+	 */
+	private String genUpAndDownPageCode(Integer page, Integer totalNum, String q, Integer pageSize,
+			String projectContext) {
+		long totalPage = totalNum % pageSize == 0 ? totalNum / pageSize : totalNum / pageSize + 1;
+		StringBuffer pageCode = new StringBuffer();
+		if (totalPage == 0) {
+			return "";
+		} else {
+			pageCode.append("<nav>");
+			pageCode.append("<ul class='pager'>");
+			if (page > 1) {
+				pageCode.append("<li><a href='" + projectContext + "/blog/q.html?page=" + (page - 1) + "&q=" + q
+						+ "'>上一页</a></li>");
+			} else {
+				pageCode.append("<li class='disabled'><a href='#'>上一页</a></li>");
+			}
+			if (page < totalPage) {
+				pageCode.append("<li><a href='" + projectContext + "/blog/q.html?page=" + (page + 1) + "&q=" + q
+						+ "'>下一页</a></li>");
+			} else {
+				pageCode.append("<li class='disabled'><a href='#'>下一页</a></li>");
+			}
+			pageCode.append("</ul>");
+			pageCode.append("</nav>");
+		}
+		return pageCode.toString();
+	}
+
 }

@@ -133,7 +133,8 @@
 	padding: 10px;
 }
 
-.data_list .commentDatas .comment , .data_list .commentDatas .otherComment{
+.data_list .commentDatas .comment, .data_list .commentDatas .otherComment
+	{
 	margin-top: 10px;
 	margin-bottom: 5px;
 	padding-bottom: 15px;
@@ -163,4 +164,8 @@
 	padding-top: 10px;
 	padding-left: 10px;
 	float: left;
+}
+
+.data_list .search {
+	padding: 5px;
 }

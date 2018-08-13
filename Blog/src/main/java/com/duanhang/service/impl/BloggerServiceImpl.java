@@ -27,4 +27,8 @@ public class BloggerServiceImpl implements BloggerService{
 		return bloggerDao.find();
 	}
 
+	public Integer update(Blogger blogger) {
+		return bloggerDao.update(blogger);
+	}
+
 }

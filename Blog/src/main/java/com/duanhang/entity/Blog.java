@@ -17,8 +17,14 @@ public class Blog {
 	private Date releaseDate; // 发布日期
 	private Integer clickHit; // 查看次数
 	private Integer replyHit; // 回复次数
+	public String getContentNoTag() {
+		return contentNoTag;
+	}
+	public void setContentNoTag(String contentNoTag) {
+		this.contentNoTag = contentNoTag;
+	}
 	private String content; // 博客内容
-	
+	private String contentNoTag; // 博客内容，无网页标签 Lucene分词用到
 	private BlogType blogType; // 博客类型
 	
 	private String keyWord; // 关键字 空格隔开

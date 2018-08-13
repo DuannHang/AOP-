@@ -59,6 +59,7 @@ public interface BlogDao {
 	 * @return
 	 */
 	public Blog getLastBlog(Integer id);
+
 	/**
 	 * 获取下一个博客文章
 	 * 
@@ -66,9 +67,23 @@ public interface BlogDao {
 	 * @return
 	 */
 	public Blog getNextBlog(Integer id);
-	
-	
-	
-	
+
+	/**
+	 * 添加博客信息
+	 * 
+	 * @param blog
+	 * @return
+	 */
+	public Integer add(Blog blog);
+
+	public Integer delete(Integer id);
+
+	/**
+	 * 查询指定的博客类别下的博客数量
+	 * 
+	 * @param typeId
+	 * @return
+	 */
+	public Integer getBlogByTypeId(Integer typeId);
 
 }

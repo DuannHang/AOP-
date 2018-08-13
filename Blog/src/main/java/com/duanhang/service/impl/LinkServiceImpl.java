@@ -26,6 +26,26 @@ public class LinkServiceImpl implements LinkService{
 		return linkDao.list(map);
 	}
 
+	public Long getTotal(Map<String, Object> map) {
+		// TODO Auto-generated method stub
+		return linkDao.getTotal(map);
+	}
+
+	public Integer add(Link link) {
+		// TODO Auto-generated method stub
+		return linkDao.add(link);
+	}
+
+	public Integer update(Link link) {
+		// TODO Auto-generated method stub
+		return linkDao.update(link);
+	}
+
+	public Integer delete(Integer id) {
+		// TODO Auto-generated method stub
+		return linkDao.delete(id);
+	}
+
 	
 	
 	
